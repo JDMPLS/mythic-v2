@@ -12,12 +12,19 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 public class MyGdxGame extends ApplicationAdapter {
+	// max rows and columns in a grid
+	private static final int MAX_ROWS = 100;
+	private static final int MAX_COLS = 100;
+	// maximum number of tiles to be displayed outward from camera
+	private static final int DISPLAY_RANGE = 10;
+	
 	//libgdx resources (camera, etc.)
 	private SpriteBatch batch;
 	private OrthographicCamera camera;
@@ -40,6 +47,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	
 	//system resources (states, timers, etc.)
 	private float stateTime;
+	private BitmapFont font;
 	
 	@Override
 	public void create () {
@@ -59,7 +67,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		
 		//grid resources
 		// 10x10 test board will delete later
-		testBoard = new String[][] {{"wall1","floor1","floor4","floor4","pit11","pit13","floor1","floor7","pit13","pit13"},
+		/*testBoard = new String[][] {{"wall1","floor1","floor4","floor4","pit11","pit13","floor1","floor7","pit13","pit13"},
 		{"wall1","floor1","floor4","floor4","pit11","pit13","floor0","floor6","pit13","pit13"},
 		{"wall1","floor1","floor4","floor4","pit10","pit22","pit13","pit13","pit13","pit13"},
 		{"wall1","floor1","floor4","floor4","floor4","pit10","pit12","pit12","pit12","pit12"},
@@ -68,13 +76,33 @@ public class MyGdxGame extends ApplicationAdapter {
 		{"wall1","floor1","floor4","floor4","floor4","floor4","floor4","floor4","floor4","floor4"},
 		{"wall1","floor0","floor3","floor3","floor3","floor3","floor3","floor3","floor3","floor3"},
 		{"wall1","wall9","wall9","wall9","wall9","wall9","wall9","wall9","wall9","wall9"},
-		{"wall0", "wall3","wall3","wall3","wall3","wall3","wall3","wall3","wall3","wall3"}};
+		{"wall0", "wall3","wall3","wall3","wall3","wall3","wall3","wall3","wall3","wall3"}};*/
+		testBoard = new String[MAX_COLS][MAX_ROWS];
+		for(int col = 0; col < MAX_COLS; col++) {
+			for(int row = 0; row < MAX_ROWS; row++) {
+				testBoard[col][row] = "floor4";
+			}
+		}
+		testBoard[0][0] = "floor2";
+		testBoard[MAX_COLS - 1][MAX_ROWS - 1] = "floor6";
+		testBoard[0][MAX_ROWS - 1] = "floor8";
+		testBoard[MAX_COLS - 1][0] = "floor0";
+		
+		// this part assumes a square grid because I got lazy and frustrated
+		for(int i = 1; i < MAX_COLS - 1; i ++) {
+			testBoard[0][i] = "floor5";
+			testBoard[i][0] = "floor1";
+			testBoard[MAX_COLS - 1][i] = "floor3";
+			testBoard[i][MAX_COLS - 1] = "floor7";
+		}
 		
 		//entity resources
 		player = new Entity(platina, 2, 2, 1, 1);
 		
 		//system resources
 		stateTime = 0f;
+		font = new BitmapFont();
+		font.getData().setScale(.3f, .3f);
 	}
 
 	@Override
@@ -93,12 +121,20 @@ public class MyGdxGame extends ApplicationAdapter {
 		batch.setProjectionMatrix(camera.combined);
 		
 		batch.begin();
-		for(int i = 0; i < 10; i ++) {
+		/*batch.draw(template.get(testBoard[j][i]).getTexture(stateTime), i, j, 1, 1);for(int i = 0; i < 10; i ++) {
 			for(int j = 0; j < 10; j++) {
 				batch.draw(template.get(testBoard[j][i]).getTexture(stateTime), i, j, 1, 1);
 			}
+		}*/
+		for(int i = (int) player.getX() - DISPLAY_RANGE; i < player.getX() + DISPLAY_RANGE; i++) {
+			for(int j = (int) player.getY() - DISPLAY_RANGE; j < player.getY() + DISPLAY_RANGE; j++) {
+				if(i >= 0 && i < MAX_COLS && j >= 0 && j < MAX_ROWS) {
+					batch.draw(template.get(testBoard[j][i]).getTexture(stateTime), i, j, 1, 1);
+				}
+			}
 		}
 		batch.draw(player.getTexture(stateTime), player.getX(), player.getY(), player.getWidth(), player.getHeight());
+		// font.draw(batch, "Hello", 0, 0);
 		batch.end();
 	}
 	
@@ -108,7 +144,7 @@ public class MyGdxGame extends ApplicationAdapter {
 				player.setX(player.getX() - 1);
 			}
 		}
-		else if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) && player.getX() < 9) {
+		else if(Gdx.input.isKeyJustPressed(Input.Keys.RIGHT) && player.getX() < MAX_COLS - 1) {
 			if(template.get(testBoard[(int) player.getY()][(int) (player.getX() + 1)]).isPassable()) {
 				player.setX(player.getX() + 1);
 			}
@@ -118,7 +154,7 @@ public class MyGdxGame extends ApplicationAdapter {
 				player.setY(player.getY() - 1);
 			}
 		}
-		else if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && player.getY() < 9) {
+		else if(Gdx.input.isKeyJustPressed(Input.Keys.UP) && player.getY() < MAX_ROWS - 1) {
 			if(template.get(testBoard[(int) (player.getY() + 1)][(int) (player.getX())]).isPassable()) {
 				player.setY(player.getY() + 1);
 			}
