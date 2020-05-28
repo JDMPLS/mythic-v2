@@ -29,6 +29,7 @@ public class MyGdxGame extends ApplicationAdapter {
 	private SpriteBatch batch;
 	private OrthographicCamera camera;
 	private FitViewport viewport;
+	private OrthographicCamera camera1;
 	
 	//graphical resources
 	private TextureAtlas charAtlas;
@@ -55,7 +56,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		//libgdx resources
 		batch = new SpriteBatch();
 		camera = new OrthographicCamera();
-		viewport = new FitViewport(20, 20, camera);
+		camera1 = new OrthographicCamera();
+		viewport = new FitViewport(32, 18, camera);
 		
 		//graphical resources
 		charAtlas = new TextureAtlas(Gdx.files.internal("Characters/Characters.atlas"));
@@ -118,7 +120,10 @@ public class MyGdxGame extends ApplicationAdapter {
 		update(stateTime);
 		camera.position.set(player.getX(), player.getY(), 0);
 		camera.update();
+		viewport.setCamera(camera);
+		viewport.apply();
 		batch.setProjectionMatrix(camera.combined);
+		
 		
 		batch.begin();
 		/*batch.draw(template.get(testBoard[j][i]).getTexture(stateTime), i, j, 1, 1);for(int i = 0; i < 10; i ++) {
@@ -133,8 +138,13 @@ public class MyGdxGame extends ApplicationAdapter {
 				}
 			}
 		}
-		batch.draw(player.getTexture(stateTime), player.getX(), player.getY(), player.getWidth(), player.getHeight());
-		// font.draw(batch, "Hello", 0, 0);
+		batch.draw(player.getTexture(stateTime), player.getX(), player.getY(), player.getWidth(), player.getHeight());	
+		camera1.position.set(0,0,0);
+		camera1.update();
+		batch.setProjectionMatrix(camera1.combined);
+		viewport.setCamera(camera1);
+		viewport.apply();
+		font.draw(batch, "Hello", 0, 0);
 		batch.end();
 	}
 	
